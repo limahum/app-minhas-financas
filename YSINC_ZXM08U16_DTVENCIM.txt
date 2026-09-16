@@ -1,0 +1,108 @@
+*&---------------------------------------------------------------------*
+*& Include          YSINC_ZXM08U16_DTVENCIM
+*&---------------------------------------------------------------------*
+*& DS4K914785 - ABAPBQMT  - 8000005943: FIN10739-COND.PGTO FORNECEDOR - A005
+*&
+*&---------------------------------------------------------------------*
+
+DATA: lv_data      TYPE datum VALUE IS INITIAL,
+      lv_data_util TYPE datum VALUE IS INITIAL.
+* Inicio da nlcusao 16/09/2026 FIN10740
+DATA: lv_data_decendial TYPE datum VALUE IS INITIAL.
+* Fim da nlcusao 16/09/2026 FIN10740
+DATA: ls_invfo_condpgt TYPE invfo,
+      ls__drseg        LIKE LINE OF t_drseg.
+
+FIELD-SYMBOLS: <fs_invfo_condpgt> TYPE any,
+               <fs__drseg>        LIKE LINE OF t_drseg.
+
+* quando for MIRO
+
+IF sy-tcode EQ 'MIRO' .
+  CLEAR ls_invfo_condpgt.
+
+  ASSIGN ('(SAPLFDCB)INVFO') TO <fs_invfo_condpgt>.
+  IF <fs_invfo_condpgt> IS ASSIGNED.
+    ls_invfo_condpgt = <fs_invfo_condpgt>.
+
+    " Condicao pgto Fornecedor = A005
+    IF ls_invfo_condpgt-zterm = 'A005'.
+      READ TABLE t_drseg[] ASSIGNING <fs__drseg> INDEX 1.
+      IF <fs_drseg> IS ASSIGNED.
+        ls__drseg = <fs__drseg>.
+
+        IF <fs_drseg> IS ASSIGNED.
+          ls_drseg = <fs_drseg>.
+
+          IF ls__drseg-bpmng IS NOT INITIAL AND ls__drseg-wemng IS NOT INITIAL.
+            SELECT SINGLE budat FROM mkpf
+                     INTO lv_data
+                    WHERE mblnr = ls__drseg-lfbnr
+                      AND mjahr = ls__drseg-lfgja.
+            IF sy-subrc = 0.
+              lv_data_util = ycl_condpag_util=>get_instance( )->get_data_util( EXPORTING vi_num_dias = 5  vi_data = lv_data ).
+
+              ls_invfo_condpgt-zfbdt = COND #( WHEN lv_data_util GT lv_data THEN lv_data_util ELSE lv_data ) .
+
+              <fs_invfo_condpgt> = ls_invfo_condpgt.
+
+            ENDIF.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+    ENDIF.
+
+* Inicio da nlcusao 16/09/2026 FIN10740
+    IF ls_invfo_condpgt-zterm = 'A050'.
+
+      CLEAR: lv_data_decendial, lv_data.
+
+      lv_data = ls_invfo_condpgt-bldat.
+
+      IF NOT lv_data IS INITIAL.
+
+        lv_data_decendial = ycl_condpag_util=>get_instance( )->get_data_decendial( EXPORTING vi_data = lv_data ).
+
+        ls_invfo_condpgt-zfbdt = COND #( WHEN lv_data_decendial GT lv_data THEN lv_data_decendial ELSE lv_data ).
+
+      ENDIF.
+
+    ENDIF.
+* Fim da inclusao  16/09/2026 FIN10740
+  ENDIF.
+ENDIF.
+
+  METHOD get_data_decendial.
+
+    DATA p_dia TYPE i.
+    DATA p_dven TYPE datum.
+    CLEAR: p_dia, p_dven.
+
+    p_dven = vi_data.
+
+    IF p_dven+6(2) BETWEEN 01 AND 10.
+
+      p_dven+6(2) = 15.
+
+    ELSEIF p_dven+6(2) BETWEEN 11 AND 20.
+
+      p_dven+6(2) = 25.
+
+    ELSEIF p_dven+6(2) BETWEEN 21 AND 31.
+
+      p_dia = p_dven+6(2).
+      WHILE  p_dia NE 5.
+
+        IF p_dven+6(2) = 5.
+          EXIT.
+        ELSE.
+          p_dven = p_dven + 1.
+          p_dia = p_dven+6(2).
+        ENDIF.
+
+      ENDWHILE.
+    ENDIF.
+
+    vr_data = p_dven.
+
+  ENDMETHOD.
