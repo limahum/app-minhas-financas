@@ -12,6 +12,8 @@ DATA: lv_data_decendial TYPE datum VALUE IS INITIAL.
 DATA: lv_data_CONDA015 TYPE datum VALUE IS INITIAL.
 DATA: lv_data_CONDA011 TYPE datum VALUE IS INITIAL.
 DATA: lv_data_CONDA013 TYPE datum VALUE IS INITIAL.
+DATA: lv_data_CONDA014 TYPE datum VALUE IS INITIAL.
+
 
 * Fim da nlcusao 16/09/2026 FIN10740
 DATA: ls_invfo_condpgt TYPE invfo,
@@ -82,7 +84,7 @@ IF sy-tcode EQ 'MIRO' .
 
       IF NOT lv_data IS INITIAL.
 
-        lv_data_CONDA015 = ycl_condpag_util=>get_instance( )->GET_DATA_CONDA015( EXPORTING vi_data = lv_data ).
+        lv_data_CONDA015 = ycl_condpag_util=>get_instance( )->get_data_conda015( EXPORTING vi_data = lv_data ).
 
         ls_invfo_condpgt-zfbdt = COND #( WHEN lv_data_CONDA015 GT lv_data THEN lv_data_CONDA015 ELSE lv_data ).
 
@@ -92,14 +94,14 @@ IF sy-tcode EQ 'MIRO' .
 
     ENDIF.
 
-      IF ls_invfo_condpgt-zterm = 'A011'.
+    IF ls_invfo_condpgt-zterm = 'A011'.
       CLEAR: lv_data_CONDA011, lv_data.
 
       lv_data = ls_invfo_condpgt-bldat.
 
       IF NOT lv_data IS INITIAL.
 
-        lv_data_CONDA011 = ycl_condpag_util=>get_instance( )->GET_DATA_CONDA011( EXPORTING vi_data = lv_data ).
+        lv_data_CONDA011 = ycl_condpag_util=>get_instance( )->get_data_conda011( EXPORTING vi_data = lv_data ).
 
         ls_invfo_condpgt-zfbdt = COND #( WHEN lv_data_CONDA011 GT lv_data THEN lv_data_CONDA011 ELSE lv_data ).
 
@@ -109,16 +111,33 @@ IF sy-tcode EQ 'MIRO' .
 
     ENDIF.
 
-       IF ls_invfo_condpgt-zterm = 'A013'.
+    IF ls_invfo_condpgt-zterm = 'A013'.
       CLEAR: lv_data_CONDA013, lv_data.
 
       lv_data = ls_invfo_condpgt-bldat.
 
       IF NOT lv_data IS INITIAL.
 
-        lv_data_CONDA013 = ycl_condpag_util=>get_instance( )->GET_DATA_CONDA013( EXPORTING vi_data = lv_data ).
+        lv_data_CONDA013 = ycl_condpag_util=>get_instance( )->get_data_conda013( EXPORTING vi_data = lv_data ).
 
         ls_invfo_condpgt-zfbdt = COND #( WHEN lv_data_CONDA013 GT lv_data THEN lv_data_CONDA013 ELSE lv_data ).
+
+        <fs_invfo_condpgt> = ls_invfo_condpgt.
+
+      ENDIF.
+
+    ENDIF.
+
+    IF ls_invfo_condpgt-zterm = 'A014'.
+      CLEAR: lv_data_CONDA014, lv_data.
+
+      lv_data = ls_invfo_condpgt-bldat.
+
+      IF NOT lv_data IS INITIAL.
+
+        lv_data_CONDA014 = ycl_condpag_util=>get_instance( )->get_data_conda014( EXPORTING vi_data = lv_data ).
+
+        ls_invfo_condpgt-zfbdt = COND #( WHEN lv_data_CONDA014 GT lv_data THEN lv_data_CONDA014 ELSE lv_data ).
 
         <fs_invfo_condpgt> = ls_invfo_condpgt.
 
