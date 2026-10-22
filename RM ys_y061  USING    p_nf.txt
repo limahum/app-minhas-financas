@@ -1,0 +1,52 @@
+RM ys_y061  USING    p_nf
+              CHANGING p_dven.
+
+    DATA p_dia    TYPE scal-indicator.
+    DATA p_Ndia   TYPE n LENGTH 2.
+    DATA ex_day  LIKE scal-indicator.
+
+    CLEAR: p_dia, p_dven, p_ndia, ex_day.
+
+    p_dven = p_nf + 17.
+
+    CALL FUNCTION 'DATE_COMPUTE_DAY'
+      EXPORTING
+        date = p_dven
+      IMPORTING
+        day  = ex_day.
+
+    IF ex_day < 2.
+      p_dven = p_dven + 1.
+
+      CALL FUNCTION 'DATE_COMPUTE_DAY'
+        EXPORTING
+          date = p_dven
+        IMPORTING
+          day  = ex_day.
+    ENDIF.
+
+    IF ex_day BETWEEN 3 AND 5.
+
+      WHILE ex_day > 2 OR ex_day < 5 .
+        IF  ex_day = 5.
+          EXIT.
+        ENDIF.
+
+        p_dven = p_dven + 1.
+
+        CALL FUNCTION 'DATE_COMPUTE_DAY'
+          EXPORTING
+            date = p_dven
+          IMPORTING
+            day  = ex_day.
+      ENDWHILE.
+
+    ENDIF.
+
+    IF ex_day BETWEEN 6 AND 7.
+
+      p_ndia = ( 7 - ex_day ) + 2.
+
+      p_dven = p_dven + p_ndia.
+
+    ENDIF.
